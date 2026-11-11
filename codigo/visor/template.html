@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flor central · F09 · Opciones A y B · Quelec</title>
+<style>
+/*FONTS*/
+:root { color-scheme: dark; --bg:#0d181d; --panel:#15252c; --card:#0f1e24; --ink:#f3f6ef; --muted:#b9cacb; --line:#3a525a; --gold:#ffcf6b; --bad:#ff5a5a; --ok:#4fe08a; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; color: var(--ink); background: var(--bg); font: 15px/1.5 Arial, Helvetica, sans-serif; }
+h1, h2 { font-family: "Quiche Display", Quiche, Georgia, serif; font-weight: 400; line-height: 1.08; margin: 6px 0 10px; }
+h1 { font-size: 40px; } h2 { font-size: 24px; margin-top: 26px; }
+h3, button, select, .eyebrow, summary, th, dt, .legend, label { font-family: Montserrat, Arial, sans-serif; }
+h3 { font-size: 14px; font-weight: 700; letter-spacing: .04em; margin: 20px 0 8px; color: var(--gold); text-transform: uppercase; }
+p { margin: 8px 0; }
+button, select { font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; border: 1px solid var(--line); background: #1e343c; border-radius: 8px; padding: 9px 11px; line-height: 1.25; }
+button:hover:not(:disabled) { border-color: var(--gold); }
+button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #17242a; }
+button:disabled, input:disabled { opacity: .4; cursor: default; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 22px; border-bottom: 1px solid var(--line); min-height: 60px; }
+header .brand { font: 400 24px/1 "Quiche Display", Quiche, Georgia, serif; }
+header .brand small { display: block; margin-top: 5px; color: var(--muted); font: 600 11px/1.3 Montserrat, Arial, sans-serif; letter-spacing: .14em; }
+header .tag { color: var(--muted); font: 600 12px/1.3 Montserrat, Arial, sans-serif; text-align: right; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) clamp(360px, 31vw, 470px); height: calc(100dvh - 61px); }
+.viewer { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
+#viewport { position: relative; min-height: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 35%, #34505a, #0d181d 80%); }
+#viewport canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
+.views { position: absolute; z-index: 2; left: 14px; top: 14px; display: grid; gap: 6px; width: 132px; }
+.views button { text-align: left; background: rgba(20, 38, 45, .92); }
+.sequence { border-top: 1px solid var(--line); padding: 12px 22px 14px; background: #122128; }
+.playback { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.playback output { margin-left: auto; font: 600 13px/1 Montserrat, Arial, sans-serif; font-variant-numeric: tabular-nums; color: var(--muted); }
+.primary { background: var(--gold); border-color: var(--gold); color: #17242a; min-width: 132px; }
+input[type="range"] { width: 100%; accent-color: var(--gold); cursor: pointer; margin: 10px 0 6px; }
+#phase { margin: 0; min-height: 22px; color: var(--ink); font-size: 14px; }
+.panel { min-width: 0; overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line); padding: 20px 24px 40px; }
+.eyebrow { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 14px 0 4px; }
+.options button { padding: 11px 10px; font-size: 14px; }
+.options button small { display: block; font-weight: 400; font-size: 12px; margin-top: 2px; }
+.modes { display: grid; gap: 7px; margin: 10px 0 14px; }
+.modes button { text-align: left; padding: 10px 12px; }
+.modes button small { display: block; font-weight: 400; font-size: 12px; opacity: .85; margin-top: 2px; }
+.finding { border-left: 4px solid var(--gold); background: var(--card); padding: 11px 14px; border-radius: 0 8px 8px 0; margin: 10px 0; }
+.finding.bad { border-left-color: var(--bad); } .finding.ok { border-left-color: var(--ok); }
+.finding strong { display: block; font-family: Montserrat, Arial, sans-serif; font-size: 14px; margin-bottom: 3px; }
+.finding p { margin: 4px 0 0; font-size: 14px; color: #dbe6e4; }
+dl.readings { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 10px 0; }
+dl.readings div { background: var(--card); border-radius: 8px; padding: 9px 10px; min-width: 0; }
+dl.readings dt { font-size: 11px; font-weight: 600; color: var(--muted); line-height: 1.3; }
+dl.readings dd { margin: 3px 0 0; color: var(--gold); font: 700 17px/1.2 Montserrat, Arial, sans-serif; }
+.chart { background: var(--card); border-radius: 8px; padding: 10px 10px 4px; margin: 8px 0 12px; }
+.chart canvas { display: block; width: 100%; height: 170px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; font-weight: 600; margin: 0 0 6px; }
+.legend i, .key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.key { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; font-size: 13px; margin: 8px 0; }
+.tools { display: grid; gap: 9px; margin: 8px 0; }
+.tools label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.tools .row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; }
+.tools .row input { grid-column: 1 / -1; margin: 0; }
+.field { display: grid; gap: 5px; margin: 10px 0; }
+.field select { width: 100%; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 11px; color: var(--muted); font-weight: 700; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
+.small { font-size: 13px; color: var(--muted); }
+[hidden] { display: none !important; }
+@media (max-width: 900px) {
+  main { display: block; height: auto; }
+  .viewer { grid-template-rows: 62dvh auto; }
+  .panel { border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
+  h1 { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Flor central<small>QUELEC Y LA SEMILLA DEL FUTURO · F09 · OPCIONES A Y B CON FÍSICA</small></div>
+  <div class="tag">Mecanismo: Jahir Santos · Arte: Mario Ávila y Felipe Camacho<br>Simulación del 11 de noviembre de 2026</div>
+</header>
+<main>
+  <section class="viewer">
+    <div id="viewport">
+      <div class="views">
+        <button data-view="corola">Corola</button>
+        <button data-view="raiz">Raíz y herrajes</button>
+        <button data-view="publico">Desde el público</button>
+        <button data-view="planta">Planta</button>
+        <button data-view="conjunto">Conjunto</button>
+      </div>
+    </div>
+    <div class="sequence">
+      <div class="playback">
+        <button id="play" class="primary">▶ Reproducir</button>
+        <button data-jump="guardada">Guardada</button>
+        <button data-jump="arriba">Arriba, retenida</button>
+        <button data-jump="mitad">A media apertura</button>
+        <button data-jump="abierta">Abierta</button>
+        <output id="time"></output>
+      </div>
+      <input id="slider" type="range" min="0" max="1" step="0.02" value="0" aria-label="Línea de tiempo">
+      <p id="phase"></p>
+    </div>
+  </section>
+  <aside class="panel">
+    <div class="eyebrow">DOS OPCIONES, CALCULADAS CON FÍSICA</div>
+    <h1>¿Se sostiene y abre el pétalo?</h1>
+    <p>Cada pétalo es un cálculo físico: tela, aro, varillas, peso, bisagra, elástico y cuerdas. Nada está animado a mano.</p>
+    <div class="options">
+      <button data-option="A" aria-pressed="true">Opción A<small>Aro de 2 m + vuelo</small></button>
+      <button data-option="B" aria-pressed="false">Opción B<small>Flex en todo el contorno</small></button>
+    </div>
+    <div class="modes">
+      <button data-mode="literal" aria-pressed="false">A1 · Aro + vuelo de tela<small>El Plan A tal como se dibujó</small></button>
+      <button data-mode="cruceta" aria-pressed="true">A2 · Aro + cruceta<small>Brazo y travesaño. Con secuencia completa</small></button>
+      <button data-mode="antena" aria-pressed="false">A3 · Cruceta + antena de punta<small>Para recuperar el largo de 4 m</small></button>
+      <button data-mode="flex" aria-pressed="false" hidden>B1 · Contener, voltear y desplegar<small>Secuencia completa con varilla de fibra de vidrio</small></button>
+      <button data-mode="flexmat" aria-pressed="false" hidden>B2 · Comparar el material del flex<small>Postura abierta con varilla o con fleje</small></button>
+    </div>
+
+    <div data-show="literal">
+      <div class="finding bad"><strong>No se sostiene: el aro cuelga de la raíz.</strong>
+        <p>Junto a la raíz el aro corre paralelo a la bisagra, así que sostener el pétalo le exige torsión, y ni el fleje ni la varilla la tienen. El aro gira sobre sí mismo y queda colgando casi vertical. Pasa con el fleje y con la varilla de fibra de vidrio. Un aro rígido de tubo de aluminio, el último de la lista, cede medio metro pero no se desploma.</p></div>
+    </div>
+    <div data-show="cruceta">
+      <div class="finding ok"><strong>Se sostiene, abre y se recoge con la misma rienda.</strong>
+        <p>Un brazo rígido de raíz a borde y un travesaño de varilla cargan el peso; el aro solo da el contorno. El vuelo de tela sin apoyo cuelga como una falda: desde abajo la flor se lee como cinco discos de 2 m, no como pétalos de 4.</p></div>
+    </div>
+    <div data-show="antena">
+      <div class="finding"><strong>La punta llega a 4 m, con caída. Falta resolver cómo se guarda.</strong>
+        <p>Una varilla de fibra de vidrio prolonga el brazo hasta la punta. La tela se tensa entre el aro y la punta y el pétalo llega a 3,9 m de largo por unos 2,3 m de ancho. Cómo se pliega esa varilla dentro del paquete no está simulado: es lo que debe probar el prototipo.</p></div>
+    </div>
+
+    <div data-show="flex">
+      <div class="finding ok"><strong>El pétalo queda completo y tenso.</strong>
+        <p>A la opción A2 se le suman una antena y un flex por todo el contorno, de varilla de fibra de vidrio de 6 mm. Un cordón recoge el contorno en tres lazos. El pétalo voltea contenido; casi vertical se suelta el cordón, el flex abre la tela hacia arriba y el pétalo baja abierto hasta el tope.</p>
+        <p><strong style="display:inline">Lo que cuesta:</strong> el paquete guardado es mucho más grande, la varilla trabaja en su límite y la rienda carga el doble.</p></div>
+    </div>
+    <div data-show="flexmat">
+      <div class="finding"><strong>Con varilla sí; con el fleje de 0,8 mm no.</strong>
+        <p>La tela se tensa si el contorno empuja hacia fuera y pesa poco. La varilla de fibra de vidrio lo logra. El fleje delgado no empuja y el más grueso pesa demasiado. Estas posturas se armaron en plano, sin pasar por el plegado.</p></div>
+    </div>
+
+    <div data-show="literal antena flexmat">
+      <div class="field"><label id="pose-label" for="pose-select">Material</label><select id="pose-select"></select></div>
+      <dl class="readings" id="pose-read"></dl>
+    </div>
+
+    <div data-show="cruceta flex">
+      <dl class="readings">
+        <div><dt>Ángulo del pétalo de arriba</dt><dd id="r-th">–</dd></div>
+        <div><dt>Altura del piso de la plataforma</dt><dd id="r-H">–</dd></div>
+        <div><dt>Tensión en su rienda</dt><dd id="r-T">–</dd></div>
+        <div><dt>Suma de las cinco riendas</dt><dd id="r-Ttot">–</dd></div>
+        <div data-show="flex"><dt>Tensión en su cordón de contención</dt><dd id="r-Tc">–</dd></div>
+      </dl>
+      <h3>Tensión de la rienda</h3>
+      <div class="chart"><div class="legend"><span><i style="background:#ffd23d"></i>Un pétalo (N)</span><span><i style="background:#ff4fd8"></i>Las cinco juntas (N)</span></div><canvas id="c-T"></canvas></div>
+      <h3>Pares en la bisagra de un pétalo</h3>
+      <div class="chart"><div class="legend"><span><i style="background:#36c5ff"></i>Peso del pétalo (N·m)</span><span><i style="background:#ff4fd8"></i>Elástico compensador (N·m)</span></div><canvas id="c-M"></canvas></div>
+      <p class="small">Positivo cierra, negativo abre. El elástico vence al peso mientras el pétalo sube y lo frena cuando cae hacia fuera; la rienda solo sostiene la diferencia.</p>
+    </div>
+
+    <h3>Qué es cada cosa</h3>
+    <div class="key">
+      <span><i style="background:#16d4c4"></i>Aro elástico</span><span><i style="background:#dfe6ea"></i>Brazo de aluminio</span>
+      <span><i style="background:#ff8a1f"></i>Travesaño de varilla</span><span><i style="background:#ffe23d"></i>Antena de punta</span>
+      <span><i style="background:#9dff2e"></i>Flex de contorno</span><span><i style="background:#31e6ff"></i>Cordón de contención</span>
+      <span><i style="background:#ffffff"></i>Rienda</span><span><i style="background:#ff2bd0"></i>Elástico compensador</span>
+      <span><i style="background:#2f6fe0"></i>Raíz, sector y palanca</span><span><i style="background:#8fa3ad"></i>Bastidor y tubo</span>
+    </div>
+
+    <h3>Ver</h3>
+    <div class="tools">
+      <div class="row"><label for="opacity">Opacidad de la tela</label><output id="opacity-out">100 %</output><input id="opacity" type="range" min="0.15" max="1" step="0.01" value="1"></div>
+      <label><input id="show-frame" type="checkbox" checked> Aro y varillas</label>
+      <label><input id="show-lines" type="checkbox" checked> Riendas y elásticos</label>
+      <label><input id="show-stage" type="checkbox" checked> Tarima y boca de la trampa</label>
+      <label><input id="follow" type="checkbox" checked> La cámara sube con la plataforma</label>
+    </div>
+
+    <h2>Números para el prototipo</h2>
+    <div id="numbers" data-show="optA"></div>
+    <div id="numbers-b" data-show="optB"></div>
+
+    <div data-show="optA">
+    <h2>Materiales del aro, comparados</h2>
+    <p class="small">Postura abierta en equilibrio, pétalo a 12° sobre la horizontal. «Caída» es cuánto baja el borde lejano del aro respecto a su plano.</p>
+    <table id="mat-table"></table>
+    </div>
+    <div data-show="optB">
+    <h2>Materiales del flex, comparados</h2>
+    <p class="small">Postura abierta en equilibrio, pétalo a 12°, con antena de 6 mm y armada en plano. Alturas respecto al plano ideal del pétalo.</p>
+    <table id="mat-table-b"></table>
+    </div>
+
+    <h2>Qué cubre esta simulación</h2>
+    <ul id="scope"></ul>
+  </aside>
+</main>
+<script id="sim-data" type="application/json">/*DATA*/</script>
+<script>/*PANEL*/</script>
+<script>/*BUNDLE*/</script>
+</body>
+</html>
