@@ -8,7 +8,9 @@ Cada pétalo sale de una simulación: tela, aro, varillas, peso, bisagra, elást
 
 ## Cómo verlo
 
-Abre `index.html` en un navegador con WebGL. Funciona sin Internet. Trae las dos opciones en la misma página.
+En línea: <https://felipecotero.github.io/estudio-analisis-mecanismos-flor-central-quelec/>
+
+También puedes descargar `index.html` y abrirlo en un navegador con WebGL: funciona sin Internet. Trae las dos opciones en la misma página.
 
 `version-anterior-solo-opcion-A.html` es la primera versión del visor, solo con la opción A.
 
