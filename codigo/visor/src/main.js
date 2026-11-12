@@ -19,10 +19,12 @@ const NH = MESH.A.nHoop;
 const maxLen = k => Math.max(1, ...Object.values(MESH).map(m => (m.ribs[k] || []).length));
 const ANIMS = D.anims;
 Object.values(ANIMS).forEach(a => { a.frames = new Int16Array(b64(a.frames)); });
+const isC = m => m === 'florc' || m === 'florcr';
 const isAnim = m => m === 'cruceta' || m === 'flex';
-const animOf = m => (m === 'flex' ? ANIMS.flex : ANIMS.cruceta);
+const animOf = m => (m === 'flex' ? ANIMS.flex : isC(m) ? ANIMS.florc : ANIMS.cruceta);
 D.poses.forEach(p => { p.x = new Int16Array(b64(p.x)); });
-const G = D.geom;            // geometría del bastidor y del mecanismo
+const G = D.geom;
+const CPOSE = new Int16Array(b64(D.C.x));            // geometría del bastidor y del mecanismo
 const TH_OPEN = ANIMS.cruceta.thOpen;
 
 // ---------- escena
@@ -219,17 +221,17 @@ const fairBeta = Math.atan2(G.fair[1], G.fair[0]);
 const fairD = Math.hypot(G.fair[0], G.fair[1]);
 const phiT = fairBeta - Math.acos(G.sectorR / fairD) + 2 * Math.PI;      // punto de tangencia de la rienda
 
-function setPetal(pt, key, src, i0, f, th, mode, cinchOn) {
+function setPetal(pt, key, src, i0, f, th, mode, cinchOn, stride, base) {
   const ms = MESH[key], N = ms.N, set = pt.sets[key], pos = set.pos, R = ms.ribs;
   for (const [k, s2] of Object.entries(pt.sets)) s2.cloth.visible = k === key;
-  const off = i0 * N * 3, off2 = off + N * 3;
+  const S = stride || N, off = (i0 * S + (base || 0)) * 3, off2 = off + S * 3;
   if (f > 0) for (let k = 0; k < N * 3; k++) pos[k] = (src[off + k] * (1 - f) + src[off2 + k] * f) * 0.001;
   else for (let k = 0; k < N * 3; k++) pos[k] = src[off + k] * 0.001;
   set.geo.attributes.position.needsUpdate = true;
   set.geo.computeVertexNormals();
   pt.hoop.set(pts(pos, hoopIdx), true);
   const ribbed = mode !== 'literal';
-  const flex = mode === 'flex' || mode === 'flexmat';
+  const flex = mode === 'flex' || mode === 'flexmat' || isC(mode);
   pt.arm.mesh.visible = pt.spreader.mesh.visible = ribbed && state.showFrame;
   const hasAnt = R.antenna.length > 0 && (mode === 'antena' || flex);
   pt.antenna.mesh.visible = hasAnt && state.showFrame;
@@ -273,11 +275,15 @@ function petalTau(i, t) { return t - T_LIFT - (4 - i) * STAGGER; }
 
 function apply() {
   const t = state.t;
-  const H = isAnim(state.mode) ? H0 + (H1 - H0) * smooth(Math.min(t / T_LIFT, 1)) : H1;
+  const H = state.mode === 'florcr' ? H1 : isAnim(state.mode) ? H0 + (H1 - H0) * smooth(Math.min(t / T_LIFT, 1)) : H1;
   if (state.follow) { const dz = H - state.lastH; camera.position.z += dz; controls.target.z += dz; }
   state.lastH = H;
   top.position.z = H;
   setScissor(H);
+  if (isC(state.mode)) {
+    for (const pt of petals) setPetal(pt, D.C.mesh[pt.i], CPOSE, 0, 0, D.C.th[pt.i], state.mode, false, D.C.N, D.C.offs[pt.i]);
+    updateReadout(); drawCharts(); return;
+  }
   for (const pt of petals) {
     if (isAnim(state.mode)) {
       const tau = Math.max(0, Math.min(petalTau(pt.i, t), T_PET));
@@ -293,6 +299,11 @@ function apply() {
 
 // ---------- lecturas y gráficas
 const fmt = (v, d = 0) => v.toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+function cFrame(t) {
+  if (state.mode === 'florcr') return Math.min(t * ANIM.fps, ANIM.nClose - 1);
+  return ANIM.nClose - 1 + Math.max(0, Math.min((t - T_LIFT) * ANIM.fps, ANIM.nOpen - 1));
+}
+function cRec(t, col) { const k = Math.round(cFrame(t)); return ANIM.rec[col][Math.min(k, ANIM.nF - 1)]; }
 function totalTension(t) { let s = 0; for (let i = 0; i < 5; i++) { const tau = petalTau(i, t); if (tau > 0 && tau < T_PET) s += lerpArr(ANIM.T, tau * ANIM.fps); } return s; }
 function updateReadout() {
   $('time').textContent = fmt(state.t, 1) + ' / ' + fmt(T_TOTAL, 1) + ' s';
@@ -300,6 +311,7 @@ function updateReadout() {
   $('slider').disabled = $('play').disabled = !anim;
   if (!anim) { $('phase').textContent = 'Postura abierta en equilibrio. Esta variante no tiene secuencia animada.'; return; }
   const t = state.t;
+  if (isC(state.mode)) { $('phase').textContent = 'Postura abierta en equilibrio, los cinco pétalos calculados juntos. La recogida no quedó resuelta: ver el panel.'; return; }
   let ph;
   if (t < T_LIFT) ph = 'Elevación con el paquete retenido (tiempo comprimido: la subida real tarda más de un minuto).';
   else if (t < T_TOTAL - 3) {
@@ -347,7 +359,22 @@ function prepSeries() {
   thDeg = ANIM.th.slice(0, flipN).map(v => v / DEG);
 }
 const niceMax = v => Math.max(50, Math.ceil(v / 50) * 50);
+function drawChartsC() {
+  const k0 = state.mode === 'florcr' ? 0 : ANIM.nClose - 1, k1 = state.mode === 'florcr' ? ANIM.nClose - 1 : ANIM.nF - 1;
+  const xs = [], series = [0, 1, 2, 3, 4].map(() => []), cr = [];
+  for (let k = k0; k <= k1; k++) {
+    const tt = state.mode === 'florcr' ? (k - k0) / ANIM.fps : T_LIFT + (k - k0) / ANIM.fps;
+    xs.push(tt);
+    for (let p = 0; p < 5; p++) series[p].push(Math.abs(ANIM.M[k * 5 + p]));
+    cr.push(ANIM.rec[3][k]);
+  }
+  const tx = []; for (let v = 0; v < T_TOTAL; v += 10) tx.push(v);
+  chart($('c-C1'), series.map((y, p) => ({ x: xs, y, color: D.C.colors[p] })), [xs[0], xs[xs.length - 1]], [0, 70], state.t, 'tiempo (s)', 'N·m', tx, [0, 20, 40, 60]);
+  const cmax = Math.max(5, ...cr);
+  chart($('c-C2'), [{ x: xs, y: cr, color: '#4fe08a' }], [xs[0], xs[xs.length - 1]], [0, cmax], state.t, 'tiempo (s)', '', tx, [0, Math.round(cmax / 2), Math.round(cmax)]);
+}
 function drawCharts() {
+  if (isC(state.mode)) return;
   if (!isAnim(state.mode) || !tAxis) return;
   const ymax = niceMax(Math.max(...totSeries));
   const ty = []; for (let v = 0; v <= ymax; v += ymax > 200 ? 100 : 50) ty.push(v);
@@ -376,30 +403,35 @@ function view(name) {
 }
 
 // ---------- interfaz
-function layoutPetals(pitch) {
+function layoutPetals(pitch, C) {
   for (const pt of petals) {
-    pt.g.position.z = G.z0 + pt.i * pitch;
+    const az = C ? D.C.az[pt.i] * DEG : (90 + pt.i * 144) * DEG;
+    pt.g.position.set(G.ringR * Math.cos(az), G.ringR * Math.sin(az), C ? D.C.hingeZ : G.z0 + pt.i * pitch);
+    pt.g.rotation.z = az;
     pt.post.set([[0, 0, -0.012], [0, 0, G.lowerZ - pt.g.position.z]]);
+    clothMats[pt.i].map = textures[C ? D.C.tex[pt.i] : D.textureOrder[pt.i]];
+    clothMats[pt.i].needsUpdate = true;
   }
 }
-const OPTION_OF = { literal: 'A', cruceta: 'A', antena: 'A', flex: 'B', flexmat: 'B' };
+const OPTION_OF = { literal: 'A', cruceta: 'A', antena: 'A', flex: 'B', flexmat: 'B', florc: 'C', florcr: 'C' };
 function setMode(mode, poseId) {
   const wasAnim = isAnim(state.mode), prev = state.mode;
   state.mode = mode;
   state.option = OPTION_OF[mode];
-  layoutPetals(state.option === 'B' ? G.pitchB : G.pitch);
-  buildStage(state.option === 'B' ? G.stage.trapB : G.stage.trapA);
+  layoutPetals(state.option === 'B' ? G.pitchB : G.pitch, state.option === 'C');
+  buildStage(state.option === 'B' ? G.stage.trapB : state.option === 'C' ? G.stage.trapC : G.stage.trapA);
   document.querySelectorAll('[data-option]').forEach(b => b.setAttribute('aria-pressed', b.dataset.option === state.option));
   document.querySelectorAll('[data-mode]').forEach(b => { b.setAttribute('aria-pressed', b.dataset.mode === mode); b.hidden = OPTION_OF[b.dataset.mode] !== state.option; });
   document.querySelectorAll('[data-show]').forEach(el => { el.hidden = !el.dataset.show.split(' ').some(k => k === mode || k === 'opt' + state.option); });
+  if (isC(mode)) { state.playing = false; $('play').textContent = '▶ Reproducir'; apply(); return; }
   if (isAnim(mode)) {
     ANIM = animOf(mode);
-    T_PET = (ANIM.nF - 1) / ANIM.fps;
-    T_TOTAL = T_LIFT + 4 * STAGGER + T_PET;
+    T_PET = isC(mode) ? (mode === 'florc' ? ANIM.nOpen - 1 : ANIM.nClose - 1) / ANIM.fps : (ANIM.nF - 1) / ANIM.fps;
+    T_TOTAL = mode === 'florc' ? T_LIFT + T_PET : mode === 'florcr' ? T_PET : T_LIFT + 4 * STAGGER + T_PET;
     $('slider').max = T_TOTAL;
     if (!wasAnim || prev !== mode) state.t = Math.min(state.t, T_TOTAL);
     $('slider').value = state.t;
-    prepSeries();
+    if (!isC(mode)) prepSeries();
   } else {
     const cfg = mode === 'flexmat' ? 'flex' : mode;
     const list = D.poses.filter(p => p.config === cfg);
@@ -421,7 +453,7 @@ function setMode(mode, poseId) {
   }
   apply();
 }
-document.querySelectorAll('[data-option]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.option === 'A' ? 'cruceta' : 'flex')));
+document.querySelectorAll('[data-option]').forEach(b => b.addEventListener('click', () => setMode({ A: 'cruceta', B: 'flex', C: 'florc' }[b.dataset.option])));
 document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
 $('pose-select').addEventListener('change', e => setMode(state.mode, e.target.value));
 document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => view(b.dataset.view)));
@@ -432,7 +464,7 @@ $('play').addEventListener('click', () => {
   $('play').textContent = state.playing ? '❚❚ Pausa' : '▶ Reproducir';
 });
 document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => {
-  state.t = { guardada: 0, arriba: T_LIFT, mitad: T_LIFT + 2 * STAGGER + T_PET / 2, abierta: T_TOTAL }[b.dataset.jump];
+  state.t = isC(state.mode) ? { guardada: 0, arriba: state.mode === 'florcr' ? T_TOTAL * 0.25 : T_LIFT, mitad: state.mode === 'florcr' ? T_TOTAL * 0.6 : T_LIFT + T_PET * 0.45, abierta: T_TOTAL }[b.dataset.jump] : { guardada: 0, arriba: T_LIFT, mitad: T_LIFT + 2 * STAGGER + T_PET / 2, abierta: T_TOTAL }[b.dataset.jump];
   state.playing = false; $('play').textContent = '▶ Reproducir'; $('slider').value = state.t; apply();
 }));
 $('opacity').addEventListener('input', e => { const v = +e.target.value; clothMats.forEach(m => { m.opacity = v; m.depthWrite = v > 0.98; }); $('opacity-out').textContent = Math.round(v * 100) + ' %'; });

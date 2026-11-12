@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, '/home/claude/work/sim')
+import os; os.chdir('/home/claude/work/sim')
 import mesh as M
 from configs import nodes_on, boundary_loop
 
@@ -27,7 +28,7 @@ B = np.load(W / 'sim/anim_flex2.npz')
 loopB = boundary_loop(mB)
 perim = float(np.hypot(*(PB[np.r_[loopB[1:], loopB[0]]] - PB[loopB]).T).sum())
 geom = dict(ringR=1.0, z0=0.24, pitch=0.06, lowerZ=0.06, platform=[2.31, 1.20], sectorR=float(A['sector_r']), fair=[-0.05, -0.20],
-            pitchB=0.12, anchorA=0.20, hornB=0.16, deltaDeg=float(np.rad2deg(A['delta'])), stage=dict(z=2.75, size=9.0, trapA=2.6, trapB=4.1), liftStowed=1.40, liftTop=9.75)
+            pitchB=0.12, anchorA=0.20, hornB=0.16, deltaDeg=float(np.rad2deg(A['delta'])), stage=dict(z=2.75, size=9.0, trapA=2.6, trapB=4.1, trapC=2.6), liftStowed=1.40, liftTop=9.75)
 
 
 def mesh_json(m, ribs):
@@ -84,7 +85,45 @@ for k, r in enumerate(flex_poses):
                           span=r['span'], reach=r['reach'], default=(k == 0)))
 
 tex = ['data:image/webp;base64,' + base64.b64encode((SRC / f'flor-central/artes-preview/FG0{i}.webp').read_bytes()).decode() for i in range(1, 6)]
-data = dict(meshes=meshes, anims=dict(cruceta=animA, flex=animB), poses=out_poses, geom=geom, textures=tex, textureOrder=[2, 0, 1, 3, 4])
+# ---------- opción C
+import jax.numpy as jnp
+import mesh_c as MC
+from sim_c import Flower, PETALS
+FC = Flower()
+src = open(W / 'sim/run_c.py').read()
+src = src[:src.index('st = f.init_state')].replace('f = Flower()', 'f = FC')
+ns = dict(FC=FC); exec(src, ns)
+Co = np.load(W / 'sim/open_c.npz')
+gC = np.asarray(FC.to_global(jnp.asarray(Co['x'])))
+def cmesh(big):
+    m = FC.meshes[big]
+    return dict(N=len(m['P']), nHoop=0, P=b64(m['P'].astype('<f4')), tri=b64(m['tri'].astype('<u2')), length=float(m['L']), width=float(m['width']),
+                ribs=dict(spreader=m['spreader'].tolist(), antenna=m['antenna'].tolist(), perimeter=m['perimeter'].tolist(), cinch=m['cinch'].tolist(),
+                          cinchAnchors=[[1.0, 0.9], [1.0, 0.0], [1.0, 0.0]]))
+meshes['Cn'] = cmesh(False); meshes['Cb'] = cmesh(True)
+mass = [float(FC.m_true_np[FC.offs[k]:FC.offs[k + 1]].sum()) for k in range(5)]
+low = [float(0.15 - gC[FC.pid_np == k, 2].min()) for k in range(5)]
+NC = dict(mass=mass, low=low, th=np.rad2deg(Co['th']).tolist(), M=Co['M'].tolist(), open_r=float(np.hypot(gC[:, 0], gC[:, 1]).max()), cross=int(np.load(W / 'sim/cross_open_c.npy')[0]))
+json.dump(NC, open(W / 'viewer/numbers_c.json', 'w'), indent=1)
+CINFO = dict(az=[p['az'] for p in PETALS], tex=[p['tex'] for p in PETALS], mesh=['Cb' if p['big'] else 'Cn' for p in PETALS], hingeZ=0.15,
+             N=int(FC.N), offs=[int(o) for o in FC.offs[:5]], x=b64(mm(Co['x'])), th=[float(v) for v in Co['th']])
+names = [p['name'] for p in PETALS]
+rows_c = ''.join(f"<tr><td>{names[k]}</td><td class=\"num\">{es(NC['th'][k], 0)}°</td><td class=\"num\">{es(NC['M'][k], 0)} N·m</td><td class=\"num\">{es(NC['low'][k], 2)} m</td><td class=\"num\">{es(mass[k], 1)} kg</td></tr>" for k in range(5))
+numbers_c = f'''
+<h3>La flor C abierta</h3>
+<table><tr><th>Pétalo</th><th>Ángulo</th><th>Par en la bisagra</th><th>Cae bajo la bisagra</th><th>Masa</th></tr>{rows_c}</table>
+<table>
+<tr><td>Flor abierta: radio desde el centro</td><td class="num">{es(NC['open_r'], 2)} m</td></tr>
+<tr><td>Cruces de tela en la postura abierta</td><td class="num">{NC['cross']}</td></tr>
+</table>
+<p class="small">Abiertos, los pétalos no llegan a tocarse: el contacto no tuvo que actuar en esta postura. Cada uno abre a un ángulo distinto para que, al bajar uno después de otro, el que llega después quede encima.</p>
+<h3>Lo que se intentó al recogerla y por qué falló</h3>
+<ul>
+<li><strong>Lámina entera doblada sobre el centro,</strong> como en el modelo de Cinema 4D. Cada lámina mide 3,25 m desde el aro y llega a 2,25 m del centro por el otro lado. Queda encima de la base de los pétalos que aún no se doblan: ya no pueden subir sin atravesarla. Con cinco pétalos de este largo y un aro de 1 m, no hay un orden que lo evite.</li>
+<li><strong>Lámina contenida con el cordón y luego doblada.</strong> La tela se arruga sobre sí misma. Este cálculo detecta el choque de un punto contra una cara, pero no alcanza a impedir los cruces de la tela arrugada: cientos consigo misma y decenas con las vecinas. Además, dos pétalos se frenaron a 120–160° sobre la pila, con el mando a 100 N·m.</li>
+<li><strong>Qué haría falta.</strong> O un plegado distinto, que reduzca cada lámina a menos de 1 m antes de voltearla (el plegado en ocho de los reflectores, por ejemplo), o un cálculo de contacto de otra categoría, más costoso. Lo más útil ahora es probarlo con un pétalo de tela y varilla a escala real.</li>
+</ul>'''
+data = dict(meshes=meshes, anims=dict(cruceta=animA, flex=animB), poses=out_poses, geom=geom, textures=tex, textureOrder=[2, 0, 1, 3, 4], C=CINFO)
 
 # ---------- números de la opción A
 a, b = geom['anchorA'], geom['hornB']
@@ -225,6 +264,7 @@ html = (W / 'viewer/template.html').read_text()
 html = html.replace('/*FONTS*/', fonts)
 for old, new in (('<div id="numbers" data-show="optA"></div>', '<div id="numbers" data-show="optA">' + numbers + '</div>'),
                  ('<div id="numbers-b" data-show="optB"></div>', '<div id="numbers-b" data-show="optB">' + numbers_b + '</div>'),
+                 ('<div id="numbers-c" data-show="optC"></div>', '<div id="numbers-c" data-show="optC">' + numbers_c + '</div>'),
                  ('<table id="mat-table"></table>', '<table id="mat-table">' + tbl + '</table>'),
                  ('<table id="mat-table-b"></table>', '<table id="mat-table-b">' + tbl_b + '</table>'),
                  ('<ul id="scope"></ul>', '<ul id="scope">' + scope + '</ul>'),
@@ -234,6 +274,6 @@ for old, new in (('<div id="numbers" data-show="optA"></div>', '<div id="numbers
 html = html.replace('/*DATA*/', json.dumps(data, separators=(',', ':')).replace('</', '<\\/'))
 html = html.replace('/*BUNDLE*/', (W / 'viewer/bundle.js').read_text().replace('</script', '<\\/script'))
 html += '\n<!-- three.js r160 · MIT License · Copyright 2010-2023 three.js authors. Montserrat · SIL Open Font License 1.1 -->\n'
-out = W / 'viewer/Abrir-Flor-Central-F09-Opciones-A-y-B.html'
+out = W / 'viewer/Abrir-Flor-Central-F09-Opciones-A-B-C.html'
 out.write_text(html)
 print('escrito', out, round(out.stat().st_size / 1e6, 2), 'MB')

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flor central · F09 · Opciones A y B · Quelec</title>
+<title>Flor central · F09 · Opciones A, B y C · Quelec</title>
 <style>
 /*FONTS*/
 :root { color-scheme: dark; --bg:#0d181d; --panel:#15252c; --card:#0f1e24; --ink:#f3f6ef; --muted:#b9cacb; --line:#3a525a; --gold:#ffcf6b; --bad:#ff5a5a; --ok:#4fe08a; }
@@ -38,7 +38,7 @@ input[type="range"] { width: 100%; accent-color: var(--gold); cursor: pointer; m
 #phase { margin: 0; min-height: 22px; color: var(--ink); font-size: 14px; }
 .panel { min-width: 0; overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line); padding: 20px 24px 40px; }
 .eyebrow { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
-.options { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 14px 0 4px; }
+.options { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin: 14px 0 4px; }
 .options button { padding: 11px 10px; font-size: 14px; }
 .options button small { display: block; font-weight: 400; font-size: 12px; margin-top: 2px; }
 .modes { display: grid; gap: 7px; margin: 10px 0 14px; }
@@ -80,7 +80,7 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
 </head>
 <body>
 <header>
-  <div class="brand">Flor central<small>QUELEC Y LA SEMILLA DEL FUTURO · F09 · OPCIONES A Y B CON FÍSICA</small></div>
+  <div class="brand">Flor central<small>QUELEC Y LA SEMILLA DEL FUTURO · F09 · OPCIONES A, B Y C CON FÍSICA</small></div>
   <div class="tag">Mecanismo: Jahir Santos · Arte: Mario Ávila y Felipe Camacho<br>Simulación del 11 de noviembre de 2026</div>
 </header>
 <main>
@@ -108,12 +108,13 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
     </div>
   </section>
   <aside class="panel">
-    <div class="eyebrow">DOS OPCIONES, CALCULADAS CON FÍSICA</div>
+    <div class="eyebrow">TRES OPCIONES, CALCULADAS CON FÍSICA</div>
     <h1>¿Se sostiene y abre el pétalo?</h1>
     <p>Cada pétalo es un cálculo físico: tela, aro, varillas, peso, bisagra, elástico y cuerdas. Nada está animado a mano.</p>
     <div class="options">
       <button data-option="A" aria-pressed="true">Opción A<small>Aro de 2 m + vuelo</small></button>
       <button data-option="B" aria-pressed="false">Opción B<small>Flex en todo el contorno</small></button>
+      <button data-option="C" aria-pressed="false">Opción C<small>Desde el centro, colores de orquídea</small></button>
     </div>
     <div class="modes">
       <button data-mode="literal" aria-pressed="false">A1 · Aro + vuelo de tela<small>El Plan A tal como se dibujó</small></button>
@@ -121,6 +122,7 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
       <button data-mode="antena" aria-pressed="false">A3 · Cruceta + antena de punta<small>Para recuperar el largo de 4 m</small></button>
       <button data-mode="flex" aria-pressed="false" hidden>B1 · Contener, voltear y desplegar<small>Secuencia completa con varilla de fibra de vidrio</small></button>
       <button data-mode="flexmat" aria-pressed="false" hidden>B2 · Comparar el material del flex<small>Postura abierta con varilla o con fleje</small></button>
+      <button data-mode="florc" aria-pressed="false" hidden>C1 · Flor abierta<small>Los cinco pétalos juntos, en equilibrio</small></button>
     </div>
 
     <div data-show="literal">
@@ -144,6 +146,13 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
     <div data-show="flexmat">
       <div class="finding"><strong>Con varilla sí; con el fleje de 0,8 mm no.</strong>
         <p>La tela se tensa si el contorno empuja hacia fuera y pesa poco. La varilla de fibra de vidrio lo logra. El fleje delgado no empuja y el más grueso pesa demasiado. Estas posturas se armaron en plano, sin pasar por el plegado.</p></div>
+    </div>
+
+    <div data-show="optC">
+      <div class="finding ok"><strong>Abierta: los cinco calculados juntos, sin cruces.</strong>
+        <p>Cada pétalo nace a 25 cm del centro con una uña angosta, se agarra al aro con una bisagra y desde ahí abre su lámina, tensada por un flex de contorno y una antena de varilla de fibra de vidrio. Colores de orquídea: el lila grande al frente, los naranjas a los lados y los dos lilas atrás.</p></div>
+      <div class="finding bad"><strong>Recogerla sin que se atraviesen no quedó resuelto.</strong>
+        <p>Se simularon los cinco recogiéndose con choque entre ellos. Doblados enteros sobre el centro, cada lámina queda encima de la base de los que siguen abiertos y no los deja doblar. Contenidos con el cordón, la tela se arruga y este cálculo no alcanza a impedir que se cruce consigo misma y con las vecinas. Además, dos pétalos se frenaron a 120–160° sobre la pila. Detalle en «Números para el prototipo».</p></div>
     </div>
 
     <div data-show="literal antena flexmat">
@@ -187,6 +196,7 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
     <h2>Números para el prototipo</h2>
     <div id="numbers" data-show="optA"></div>
     <div id="numbers-b" data-show="optB"></div>
+    <div id="numbers-c" data-show="optC"></div>
 
     <div data-show="optA">
     <h2>Materiales del aro, comparados</h2>

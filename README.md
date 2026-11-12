@@ -10,7 +10,7 @@ Cada pétalo sale de una simulación: tela, aro, varillas, peso, bisagra, elást
 
 En línea: <https://felipecotero.github.io/estudio-analisis-mecanismos-flor-central-quelec/>
 
-También puedes descargar `index.html` y abrirlo en un navegador con WebGL: funciona sin Internet. Trae las dos opciones en la misma página.
+También puedes descargar `index.html` y abrirlo en un navegador con WebGL: funciona sin Internet. Trae las tres opciones en la misma página.
 
 `version-anterior-solo-opcion-A.html` es la primera versión del visor, solo con la opción A.
 
@@ -25,6 +25,13 @@ Es el Plan A de la reunión del 5 de noviembre.
 ## Opción B · Flex en todo el contorno
 
 La A2 más una antena de punta y un flex por todo el borde, ambos de varilla de fibra de vidrio de 6 mm. Un cordón recoge el contorno en tres lazos; el pétalo voltea contenido, casi vertical se suelta el cordón, el flex abre la tela hacia arriba y el pétalo baja abierto. Queda completo y tenso.
+
+## Opción C · Pétalos que nacen del centro
+
+Cada pétalo nace a 25 cm del centro con una uña angosta, se agarra al aro con una bisagra y desde ahí abre su lámina, tensada por un flex de contorno y una antena de varilla de fibra de vidrio. Colores de orquídea: el lila grande al frente, los naranjas a los lados y los dos lilas atrás. Los cinco pétalos se calculan juntos, con choque entre ellos.
+
+- **Abierta:** en equilibrio y sin cruces de tela. Cada pétalo abre a un ángulo distinto.
+- **Recogida: no resuelta.** Doblada entera sobre el centro, cada lámina tapa la base de los pétalos que siguen abiertos. Contenida con el cordón, la tela se arruga y el cálculo de contacto no alcanza a impedir los cruces. El visor muestra solo la flor abierta.
 
 ## Comparación
 
@@ -51,8 +58,8 @@ Esto es un estudio para orientar el prototipo. No es un cálculo estructural ni 
 
 ## Contenido
 
-- `index.html`: visor con las opciones A y B.
-- `capturas/`: nueve vistas del visor.
+- `index.html`: visor con las opciones A, B y C.
+- `capturas/`: once vistas del visor.
 - `hallazgos.md`: resultados y números.
 - `codigo/simulacion/`: motor físico en Python (JAX, NumPy, SciPy).
   - `mesh.py`: patrón del pétalo.
@@ -60,6 +67,7 @@ Esto es un estudio para orientar el prototipo. No es un cálculo estructural ni 
   - `configs.py`: variantes.
   - `run_anim.py`, `run_poses.py`: opción A.
   - `run_anim_flex.py`, `rerun_flex_open.py`, `run_poses_flex.py`: opción B.
+  - `mesh_c.py`, `sim_c.py`, `run_c.py`, `run_c_open.py`, `check_c.py`: opción C, los cinco pétalos con contacto y el conteo de cruces.
 - `codigo/visor/`: fuente del visor (three.js) y `build.py`, que lo empaqueta. Las rutas de `build.py` apuntan al entorno donde se generó y hay que ajustarlas para correrlo en otro equipo.
 
 ## Créditos

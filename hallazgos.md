@@ -1,4 +1,4 @@
-# Flor central · F09 · Opciones A y B con física (11 nov 2026)
+# Flor central · F09 · Opciones A, B y C con física (11 nov 2026)
 
 Simulación física de un pétalo: tela de 80 g/m², aro de 2 m, vuelo hasta 4 × 3,5 m, bisagra en el aro periférico, elástico y rienda. El visor con las dos opciones es `index.html`. La primera versión, solo con la opción A, se conserva como `version-anterior-solo-opcion-A.html`. El código está en `codigo/`.
 
@@ -51,7 +51,16 @@ Base A2 más una antena de punta y un flex por todo el contorno, ambos de varill
 | Ancho visible / flor de borde a borde | 3,43 m / 9,7 m |
 | Paquete guardado | 3,84 m de diámetro; cada pétalo contenido levanta 0,48 m sin aplastar |
 
-## Límites de ambas
+## Opción C · Pétalos que nacen del centro
+
+- Uña angosta (14 a 40 cm) desde 25 cm del centro hasta el aro; bisagra en el aro; lámina de 3,25 m (3,6 m el lila grande) con brazo, travesaño, antena y flex de contorno de varilla de 6 mm.
+- Los cinco se simularon juntos con contacto vértice–cara y borde–cara entre ellos y consigo mismos.
+- **Abierta:** equilibrio sin cruces. Ángulos de −9° (lila grande) a 16° (lila de atrás); radio de la flor 4,5 m; la punta del lila grande cae 1,7 m bajo la bisagra. Abiertos no se tocan.
+- **Recogida, primer intento (lámina entera sobre el centro):** cada lámina llega a 2,25 m del centro por el lado opuesto y tapa la base de los que siguen abiertos. Aparecieron cruces entre pétalos desde el tercer pétalo recogido.
+- **Recogida, segundo intento (contenida con cordón y luego doblada):** la tela arrugada se cruza consigo misma (cientos de aristas) y con las vecinas (decenas a cientos). Dos pétalos se frenaron a 120–160° sobre la pila con el mando a 100 N·m.
+- **Conclusión:** para recogerla hace falta reducir cada lámina a menos de 1 m antes de voltearla (por ejemplo, el plegado en ocho de los reflectores) o un cálculo de contacto más robusto. Lo siguiente útil es un pétalo de prueba a escala real.
+
+## Límites de A y B
 
 - Sin viento. Entre 45 y 49 m² de tela a 10 m; la Compact 12 admite 20 daN de empuje lateral manual y 45 km/h en exterior. Por validar con el proveedor de la máquina.
 - Un pétalo simulado y copiado cinco veces: no hay choque entre pétalos ni entre capas. En B los pétalos abiertos se montan unos 25 cm.
