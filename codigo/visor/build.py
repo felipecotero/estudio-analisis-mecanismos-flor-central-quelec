@@ -28,7 +28,7 @@ B = np.load(W / 'sim/anim_flex2.npz')
 loopB = boundary_loop(mB)
 perim = float(np.hypot(*(PB[np.r_[loopB[1:], loopB[0]]] - PB[loopB]).T).sum())
 geom = dict(ringR=1.0, z0=0.24, pitch=0.06, lowerZ=0.06, platform=[2.31, 1.20], sectorR=float(A['sector_r']), fair=[-0.05, -0.20],
-            pitchB=0.12, anchorA=0.20, hornB=0.16, deltaDeg=float(np.rad2deg(A['delta'])), stage=dict(z=2.75, size=9.0, trapA=2.6, trapB=4.1, trapC=2.6), liftStowed=1.40, liftTop=9.75)
+            pitchB=0.12, anchorA=0.20, hornB=0.16, deltaDeg=float(np.rad2deg(A['delta'])), stage=dict(z=2.75, size=9.0, trapA=2.6, trapB=4.1, trapC=2.6, trapC8=2.6), liftStowed=1.40, liftTop=9.75)
 
 
 def mesh_json(m, ribs):
@@ -123,7 +123,54 @@ numbers_c = f'''
 <li><strong>Lámina contenida con el cordón y luego doblada.</strong> La tela se arruga sobre sí misma. Este cálculo detecta el choque de un punto contra una cara, pero no alcanza a impedir los cruces de la tela arrugada: cientos consigo misma y decenas con las vecinas. Además, dos pétalos se frenaron a 120–160° sobre la pila, con el mando a 100 N·m.</li>
 <li><strong>Qué haría falta.</strong> O un plegado distinto, que reduzca cada lámina a menos de 1 m antes de voltearla (el plegado en ocho de los reflectores, por ejemplo), o un cálculo de contacto de otra categoría, más costoso. Lo más útil ahora es probarlo con un pétalo de tela y varilla a escala real.</li>
 </ul>'''
-data = dict(meshes=meshes, anims=dict(cruceta=animA, flex=animB), poses=out_poses, geom=geom, textures=tex, textureOrder=[2, 0, 1, 3, 4], C=CINFO)
+# ---------- opción C plegada en ocho
+from sim_c8 import Flower8, MAST_H
+F8 = Flower8()
+A8 = np.load(W / 'sim/anim_c8.npz'); Fr8 = A8['frames']; rec8 = A8['rec']; n8 = len(Fr8)
+th8 = rec8[:, 1:6]; Mh8 = rec8[:, 6:11]; T8 = rec8[:, 11:26]; tf8 = rec8[:, 26:31]; w8 = rec8[:, 31:36]
+cr8 = np.load(W / 'sim/cross_c8.npy')
+open8 = ((tf8 < 0.02) & (th8 < np.deg2rad(40))).sum(1)
+anim8 = dict(N=int(F8.N), offs=[int(o) for o in F8.offs[:5]], nF=n8, fps=int(A8['fps']), frames=b64(mm(Fr8)), th=th8.round(4).ravel().tolist(),
+             tf=tf8.round(3).ravel().tolist(), open=open8.tolist(), Tmax=T8.max(1).round(1).tolist(), crossAll=cr8[:, 1].astype(int).tolist(), crossP=cr8[:, 2].astype(int).tolist())
+g8s = np.asarray(F8.to_global(jnp.asarray(Fr8[0], float))); g8o = np.asarray(F8.to_global(jnp.asarray(Fr8[-1], float)))
+N8 = dict(mass=[float(F8.m_true_np[F8.offs[k]:F8.offs[k + 1]].sum()) for k in range(5)], coilR=[float(r) for r in F8.coilR], loopL=[float(l) for l in F8.loopL],
+          strain=float(F8.rod['d'] / 2 / min(F8.coilR)), bud_r=float(np.hypot(g8s[:, 0], g8s[:, 1]).max()), bud_h=float(g8s[:, 2].max()),
+          open_r=float(np.hypot(g8o[:, 0], g8o[:, 1]).max()), Tmax=float(T8[-20:].max()), Tmax_all=float(T8.max()), Mmax=float(np.abs(Mh8).max()),
+          crossP_max=int(cr8[:, 2].max()), cross_end=int(cr8[-1, 1]), cross_stored=int(cr8[0, 1]))
+json.dump(N8, open(W / 'viewer/numbers_c8.json', 'w'), indent=1)
+numbers_c8 = f'''
+<h3>Un pétalo C plegado en ocho</h3>
+<table>
+<tr><td>Varilla de contorno (fibra de vidrio Ø10 mm), una pieza</td><td class="num">{es(N8['loopL'][1], 1)} m · {es(N8['loopL'][0], 1)} m el grande</td></tr>
+<tr><td>Diámetro de los tres aros plegados</td><td class="num">{es(2 * N8['coilR'][1], 2)} m · {es(2 * N8['coilR'][0], 2)} m el grande</td></tr>
+<tr><td>Deformación de la varilla plegada</td><td class="num">{es(N8['strain'] * 100, 1)} %</td></tr>
+<tr><td>Masa de un pétalo / del grande</td><td class="num">{es(N8['mass'][1], 1)} kg · {es(N8['mass'][0], 1)} kg</td></tr>
+<tr><td>Tensor más cargado, abierta</td><td class="num">{es(N8['Tmax'], 0)} N</td></tr>
+<tr><td>Par máximo en una bisagra</td><td class="num">{es(N8['Mmax'], 0)} N·m</td></tr>
+</table>
+<h3>Guardada y abierta</h3>
+<table>
+<tr><td>Capullo guardado: diámetro</td><td class="num">{es(2 * N8['bud_r'], 2)} m</td></tr>
+<tr><td>Capullo guardado: alto sobre la plataforma</td><td class="num">{es(N8['bud_h'], 2)} m</td></tr>
+<tr><td>Mástil central sobre la bisagra</td><td class="num">{es(MAST_H, 1)} m</td></tr>
+<tr><td>Flor abierta: radio desde el centro</td><td class="num">{es(N8['open_r'], 2)} m</td></tr>
+</table>
+<h3>Choques pasados en alto</h3>
+<table>
+<tr><td>Cruces de tela guardada (casi todos de cada tela consigo misma)</td><td class="num">{N8['cross_stored']}</td></tr>
+<tr><td>Máximo de cruces entre pétalos distintos al abrir</td><td class="num">{N8['crossP_max']}</td></tr>
+<tr><td>Cruces con la flor abierta</td><td class="num">{N8['cross_end']}</td></tr>
+</table>
+<h3>Cómo se arma</h3>
+<ul>
+<li><strong>Una varilla por pétalo,</strong> de fibra de vidrio de 10 mm, en una funda por todo el contorno de la lámina, con los dos extremos fijos en la bisagra del aro. No hay brazo rígido ni antena: estorbarían el plegado.</li>
+<li><strong>Plegado en ocho fuera de escena:</strong> se tuerce la mitad lejana, se forma el ocho y se recoge en tres aros. Una funda o una correa con liberación lo retiene; soltarla de forma dosificada evita que el aro salte de golpe.</li>
+<li><strong>Mástil central de {es(MAST_H, 1)} m</strong> con tres tensores a cada pétalo (punta y dos costados). Están flojos mientras el pétalo sube y se despliega, y lo toman al bajar.</li>
+<li><strong>Límite de la varilla.</strong> Plegada trabaja al {es(N8['strain'] * 100, 1)} %, cerca del límite de la fibra de vidrio. Si el prototipo muestra fatiga, bajar a 9 mm o agrandar los aros.</li>
+<li><strong>Riesgo de seguridad:</strong> un aro de resorte de 10 m que se suelta de golpe latiguea. La liberación tiene que ser controlada.</li>
+</ul>'''
+CINFO['mastH'] = MAST_H
+data = dict(meshes=meshes, anims=dict(cruceta=animA, flex=animB, c8=anim8), poses=out_poses, geom=geom, textures=tex, textureOrder=[2, 0, 1, 3, 4], C=CINFO)
 
 # ---------- números de la opción A
 a, b = geom['anchorA'], geom['hornB']
@@ -264,7 +311,8 @@ html = (W / 'viewer/template.html').read_text()
 html = html.replace('/*FONTS*/', fonts)
 for old, new in (('<div id="numbers" data-show="optA"></div>', '<div id="numbers" data-show="optA">' + numbers + '</div>'),
                  ('<div id="numbers-b" data-show="optB"></div>', '<div id="numbers-b" data-show="optB">' + numbers_b + '</div>'),
-                 ('<div id="numbers-c" data-show="optC"></div>', '<div id="numbers-c" data-show="optC">' + numbers_c + '</div>'),
+                 ('<div id="numbers-c" data-show="florc"></div>', '<div id="numbers-c" data-show="florc">' + numbers_c + '</div>'),
+                 ('<div id="numbers-c8" data-show="florc8"></div>', '<div id="numbers-c8" data-show="florc8">' + numbers_c8 + '</div>'),
                  ('<table id="mat-table"></table>', '<table id="mat-table">' + tbl + '</table>'),
                  ('<table id="mat-table-b"></table>', '<table id="mat-table-b">' + tbl_b + '</table>'),
                  ('<ul id="scope"></ul>', '<ul id="scope">' + scope + '</ul>'),

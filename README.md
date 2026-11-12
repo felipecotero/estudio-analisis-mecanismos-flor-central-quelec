@@ -30,8 +30,8 @@ La A2 más una antena de punta y un flex por todo el borde, ambos de varilla de 
 
 Cada pétalo nace a 25 cm del centro con una uña angosta, se agarra al aro con una bisagra y desde ahí abre su lámina, tensada por un flex de contorno y una antena de varilla de fibra de vidrio. Colores de orquídea: el lila grande al frente, los naranjas a los lados y los dos lilas atrás. Los cinco pétalos se calculan juntos, con choque entre ellos.
 
-- **Abierta:** en equilibrio y sin cruces de tela. Cada pétalo abre a un ángulo distinto.
-- **Recogida: no resuelta.** Doblada entera sobre el centro, cada lámina tapa la base de los pétalos que siguen abiertos. Contenida con el cordón, la tela se arruga y el cálculo de contacto no alcanza a impedir los cruces. El visor muestra solo la flor abierta.
+- **C1 · Plegado en ocho (secuencia completa).** Sin brazo rígido: una sola varilla de fibra de vidrio de 10 mm por todo el contorno, que se pliega en ocho como un reflector, en tres aros de 1,1 m. Guardados, los cinco forman un capullo de 2,3 m de diámetro y 1,3 m de alto alrededor de un mástil central. Al abrir, cada pétalo se despliega hacia arriba y baja hasta que lo toman tres tensores desde el mástil. **En esta versión los choques de tela no se calculan:** guardada, la tela se cruza consigo misma; al abrir hay cruces entre pétalos; abierta, cero.
+- **C2 · Abierta con choque calculado.** La versión con brazo y antena, en equilibrio y sin cruces. Recogerla con choque no quedó resuelto.
 
 ## Comparación
 
@@ -59,7 +59,7 @@ Esto es un estudio para orientar el prototipo. No es un cálculo estructural ni 
 ## Contenido
 
 - `index.html`: visor con las opciones A, B y C.
-- `capturas/`: once vistas del visor.
+- `capturas/`: catorce vistas del visor.
 - `hallazgos.md`: resultados y números.
 - `codigo/simulacion/`: motor físico en Python (JAX, NumPy, SciPy).
   - `mesh.py`: patrón del pétalo.
@@ -67,7 +67,8 @@ Esto es un estudio para orientar el prototipo. No es un cálculo estructural ni 
   - `configs.py`: variantes.
   - `run_anim.py`, `run_poses.py`: opción A.
   - `run_anim_flex.py`, `rerun_flex_open.py`, `run_poses_flex.py`: opción B.
-  - `mesh_c.py`, `sim_c.py`, `run_c.py`, `run_c_open.py`, `check_c.py`: opción C, los cinco pétalos con contacto y el conteo de cruces.
+  - `mesh_c.py`, `sim_c.py`, `run_c.py`, `run_c_open.py`, `check_c.py`: opción C2, los cinco pétalos con contacto y el conteo de cruces.
+  - `sim_c8.py`, `run_c8.py`: opción C1, plegado en ocho con tensores (sin contacto).
 - `codigo/visor/`: fuente del visor (three.js) y `build.py`, que lo empaqueta. Las rutas de `build.py` apuntan al entorno donde se generó y hay que ajustarlas para correrlo en otro equipo.
 
 ## Créditos

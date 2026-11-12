@@ -114,7 +114,7 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
     <div class="options">
       <button data-option="A" aria-pressed="true">Opción A<small>Aro de 2 m + vuelo</small></button>
       <button data-option="B" aria-pressed="false">Opción B<small>Flex en todo el contorno</small></button>
-      <button data-option="C" aria-pressed="false">Opción C<small>Desde el centro, colores de orquídea</small></button>
+      <button data-option="C" aria-pressed="false">Opción C<small>Desde el centro, plegado en ocho</small></button>
     </div>
     <div class="modes">
       <button data-mode="literal" aria-pressed="false">A1 · Aro + vuelo de tela<small>El Plan A tal como se dibujó</small></button>
@@ -122,7 +122,8 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
       <button data-mode="antena" aria-pressed="false">A3 · Cruceta + antena de punta<small>Para recuperar el largo de 4 m</small></button>
       <button data-mode="flex" aria-pressed="false" hidden>B1 · Contener, voltear y desplegar<small>Secuencia completa con varilla de fibra de vidrio</small></button>
       <button data-mode="flexmat" aria-pressed="false" hidden>B2 · Comparar el material del flex<small>Postura abierta con varilla o con fleje</small></button>
-      <button data-mode="florc" aria-pressed="false" hidden>C1 · Flor abierta<small>Los cinco pétalos juntos, en equilibrio</small></button>
+      <button data-mode="florc8" aria-pressed="false" hidden>C1 · Plegado en ocho: elevar y abrir<small>Secuencia completa; los choques no se calculan</small></button>
+      <button data-mode="florc" aria-pressed="false" hidden>C2 · Abierta con choque calculado<small>Versión con brazo y antena, en equilibrio</small></button>
     </div>
 
     <div data-show="literal">
@@ -148,7 +149,25 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
         <p>La tela se tensa si el contorno empuja hacia fuera y pesa poco. La varilla de fibra de vidrio lo logra. El fleje delgado no empuja y el más grueso pesa demasiado. Estas posturas se armaron en plano, sin pasar por el plegado.</p></div>
     </div>
 
-    <div data-show="optC">
+    <div data-show="florc8">
+      <div class="finding ok"><strong>Se guarda en un capullo de 2,3 m y abre hacia arriba.</strong>
+        <p>Cada pétalo es una sola varilla de fibra de vidrio de 10 mm por todo el contorno, con la tela tensada adentro, sujeta a la bisagra del aro. Se pliega en ocho, como un reflector de fotografía, en tres aros de 1,1 m. Guardados, los cinco quedan de pie alrededor del mástil central.</p>
+        <p>Al abrir: el pétalo se endereza, la funda suelta el ocho, la varilla abre el pétalo hacia arriba y baja hasta que lo toman tres tensores desde la punta del mástil. Esa es la doble tensión: la varilla empuja a abrir, los tensores sostienen hacia el centro.</p></div>
+      <div class="finding bad"><strong>Los choques se pasaron en alto.</strong>
+        <p>En esta versión la tela no choca consigo misma ni con las vecinas. Plegada, la tela arrugada dentro de los aros se cruza consigo misma; entre pétalos distintos hay cruces mientras abren. Abierta: cero. El gráfico de abajo los cuenta.</p></div>
+      <dl class="readings">
+        <div><dt>Pétalos abiertos</dt><dd id="r8-open">–</dd></div>
+        <div><dt>Altura del piso de la plataforma</dt><dd id="r8-H">–</dd></div>
+        <div><dt>Tensor más cargado</dt><dd id="r8-T">–</dd></div>
+        <div><dt>Cruces entre pétalos distintos</dt><dd id="r8-crossP">–</dd></div>
+        <div><dt>Cruces de tela en total (con los propios)</dt><dd id="r8-cross">–</dd></div>
+      </dl>
+      <h3>Tensor más cargado</h3>
+      <div class="chart"><div class="legend"><span><i style="background:#31e6ff"></i>Tensión (N)</span></div><canvas id="c8-T"></canvas></div>
+      <h3>Cruces entre pétalos distintos</h3>
+      <div class="chart"><div class="legend"><span><i style="background:#ff5a5a"></i>Aristas de un pétalo que atraviesan otro</span></div><canvas id="c8-X"></canvas></div>
+    </div>
+    <div data-show="florc">
       <div class="finding ok"><strong>Abierta: los cinco calculados juntos, sin cruces.</strong>
         <p>Cada pétalo nace a 25 cm del centro con una uña angosta, se agarra al aro con una bisagra y desde ahí abre su lámina, tensada por un flex de contorno y una antena de varilla de fibra de vidrio. Colores de orquídea: el lila grande al frente, los naranjas a los lados y los dos lilas atrás.</p></div>
       <div class="finding bad"><strong>Recogerla sin que se atraviesen no quedó resuelto.</strong>
@@ -179,7 +198,7 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
     <div class="key">
       <span><i style="background:#16d4c4"></i>Aro elástico</span><span><i style="background:#dfe6ea"></i>Brazo de aluminio</span>
       <span><i style="background:#ff8a1f"></i>Travesaño de varilla</span><span><i style="background:#ffe23d"></i>Antena de punta</span>
-      <span><i style="background:#9dff2e"></i>Flex de contorno</span><span><i style="background:#31e6ff"></i>Cordón de contención</span>
+      <span><i style="background:#9dff2e"></i>Flex de contorno</span><span><i style="background:#31e6ff"></i>Cordón (B) o tensor (C)</span>
       <span><i style="background:#ffffff"></i>Rienda</span><span><i style="background:#ff2bd0"></i>Elástico compensador</span>
       <span><i style="background:#2f6fe0"></i>Raíz, sector y palanca</span><span><i style="background:#8fa3ad"></i>Bastidor y tubo</span>
     </div>
@@ -196,7 +215,8 @@ ul { margin: 6px 0; padding-left: 20px; } li { margin: 5px 0; font-size: 14px; }
     <h2>Números para el prototipo</h2>
     <div id="numbers" data-show="optA"></div>
     <div id="numbers-b" data-show="optB"></div>
-    <div id="numbers-c" data-show="optC"></div>
+    <div id="numbers-c8" data-show="florc8"></div>
+    <div id="numbers-c" data-show="florc"></div>
 
     <div data-show="optA">
     <h2>Materiales del aro, comparados</h2>

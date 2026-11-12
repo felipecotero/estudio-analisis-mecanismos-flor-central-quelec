@@ -60,6 +60,15 @@ Base A2 más una antena de punta y un flex por todo el contorno, ambos de varill
 - **Recogida, segundo intento (contenida con cordón y luego doblada):** la tela arrugada se cruza consigo misma (cientos de aristas) y con las vecinas (decenas a cientos). Dos pétalos se frenaron a 120–160° sobre la pila con el mando a 100 N·m.
 - **Conclusión:** para recogerla hace falta reducir cada lámina a menos de 1 m antes de voltearla (por ejemplo, el plegado en ocho de los reflectores) o un cálculo de contacto más robusto. Lo siguiente útil es un pétalo de prueba a escala real.
 
+### C1 · Plegado en ocho (11 nov, noche)
+
+- Contorno de una sola varilla de fibra de vidrio Ø10 mm (10,0 m; 11,2 m el grande) sujeta en la bisagra; sin brazo ni antena.
+- Plegada en ocho: tres aros de 1,11 m (1,23 m el grande); la varilla trabaja al 0,9 %, cerca del límite de la fibra de vidrio.
+- Guardada: capullo de 2,3 m de diámetro y 1,3 m de alto sobre la plataforma, de pie alrededor de un mástil central de 1,5 m sobre la bisagra.
+- Abierta: tres tensores por pétalo desde la punta del mástil (punta y costados) la sostienen casi plana; el tensor más cargado lleva unos 20 N.
+- Choques no calculados, por acuerdo: guardada hay unos 11.700 cruces de tela (casi todos de cada tela consigo misma); al abrir, hasta unos 330 entre pétalos distintos; abierta, cero.
+- Riesgo: un aro de resorte de 10 m que se suelta de golpe latiguea; la liberación debe ser controlada (funda o correa con freno).
+
 ## Límites de A y B
 
 - Sin viento. Entre 45 y 49 m² de tela a 10 m; la Compact 12 admite 20 daN de empuje lateral manual y 45 km/h en exterior. Por validar con el proveedor de la máquina.
